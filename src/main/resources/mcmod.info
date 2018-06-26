@@ -1,0 +1,16 @@
+[
+{
+  "modid": "chikachi.entity.dump",
+  "name": "Chikachi's Entity Dump",
+  "description": "Utils mod to dump locations of entities and tile entities",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Chikachi"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

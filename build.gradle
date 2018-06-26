@@ -1,0 +1,101 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url = "http://files.minecraftforge.net/maven" }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    }
+}
+apply plugin: 'net.minecraftforge.gradle.forge'
+//Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+
+def mcVersion = '1.12.2'
+def forgeVersion = '14.23.4.2705'
+def modVersion = '0.1.0'
+
+version = 'mc' + mcVersion + '-' + modVersion
+group = "chikachi.dump" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+archivesBaseName = "ChikachiEntityDump"
+
+sourceCompatibility = targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
+
+minecraft {
+    version = mcVersion + '-' + forgeVersion
+
+    if (file('../run').exists()) {
+        runDir = '../run'
+    } else {
+        runDir = 'run'
+    }
+    
+    // the mappings can be changed at any time, and must be in the following format.
+    // snapshot_YYYYMMDD   snapshot are built nightly.
+    // stable_#            stables are built at the discretion of the MCP team.
+    // Use non-default mappings at your own risk. they may not always work.
+    // simply re-run your setup task after changing the mappings to update your workspace.
+    mappings = "snapshot_20171003"
+    // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
+}
+
+def printDebug(message) {
+    println "[" + archivesBaseName + "] " + message
+}
+
+class CurseForgeDependencyInfo {
+    public String module, version, ext;
+    private String fileid;
+
+    public CurseForgeDependencyInfo(String module, String version, String ext, String fileid) {
+        this.module = module;
+        this.version = version;
+        this.ext = ext;
+        this.fileid = fileid;
+    }
+
+    public String GetFileId() {
+        return Integer.parseInt(fileid.substring(0, 4)) + "/" + Integer.parseInt(fileid.substring(4));
+    }
+}
+
+List<CurseForgeDependencyInfo> curseForgeDependencies = new ArrayList<CurseForgeDependencyInfo>();
+
+dependencies {
+    for (CurseForgeDependencyInfo dependency : curseForgeDependencies) {
+        if (file("../" + dependency.module).exists()) {
+            printDebug "Using local " + dependency.module + " project"
+            compile project(":" + dependency.module)
+            continue;
+        }
+        if (file("./" + dependency.module + ".jar").exists()) {
+            printDebug "Using local " + dependency.module + " compiled jar"
+            compile files("./" + dependency.module + ".jar")
+            continue;
+        }
+        compile group: dependency.GetFileId(), name: dependency.module, version: dependency.version, ext: dependency.ext
+    }
+}
+
+processResources {
+    // this will ensure that this task is redone when the versions change.
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+
+    // replace stuff in mcmod.info, nothing else
+    from(sourceSets.main.resources.srcDirs) {
+        include 'mcmod.info'
+
+        // replace version and mcversion
+        expand 'version': project.version, 'mcversion': project.minecraft.version
+    }
+
+    // copy everything else, thats not the mcmod.info
+    from(sourceSets.main.resources.srcDirs) {
+        exclude 'mcmod.info'
+    }
+}
+
+idea { module { inheritOutputDirs = true } }
