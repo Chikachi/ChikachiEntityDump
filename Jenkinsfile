@@ -24,7 +24,7 @@ pipeline {
     stage('Prepare') {
       steps {
         sh 'chmod +x gradlew'
-        sh './gradlew setupCiWorkspace clean spotlessApply'
+        sh './gradlew setupCiWorkspace clean'
       }
     }
     stage('Build') {
